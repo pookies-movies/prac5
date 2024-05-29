@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Page</title>
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    form {
+      margin-bottom: 20px;
+    }
+    input, select, textarea, button {
+      display: block;
+      margin: 10px 0;
+      padding: 10px;
+      width: 100%;
+      max-width: 300px;
+    }
+    label {
+      margin-top: 10px;
+    }
+    img {
+      max-width: 300px;
+      margin-top: 10px;
+    }
+    .hidden {
+      display: none;
+    }
+    .movie-item {
+      margin-bottom: 20px;
+    }
+    .movie-item img {
+      display: block;
+      margin: 10px 0;
+    }
+    .movie-item button {
+      margin-right: 10px;
+    }
+    #searchBar {
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 300px;
+      padding: 10px;
+    }
+
+    .movie-item {
+  margin-bottom: 20px;
+}
+
+.movie-item img {
+  display: block;
+  margin: 10px 0;
+}
+
+.movie {
+  background-color: #f9f9f9; 
+}
+
+.series {
+  background-color: #e6f7ff;
+}
+
+
+  </style>
+
+</head>
+<body>
+  <h1>Admin Page</h1>
+  <form id="movieForm">
+    <select id="type" name="type" required>
+      <option value="">Select Type</option>
+      <option value="movie">Movie</option>
+      <option value="series">Series</option>
+    </select>
+    <input type="text" id="title" name="title" placeholder="Title" required>
+    <input type="text" id="genre" name="genre" placeholder="Genre" required>
+    <input type="number" id="year" name="year" placeholder="Year" required>
+    <input type="text" id="pgRating" name="pgRating" placeholder="PG Rating">
+    <textarea id="description" name="description" placeholder="Description" rows="4"></textarea>
+    <input type="url" id="imageUrl" name="imageUrl" placeholder="Image URL">
+    <input type="number" id="runtime" name="runtime" placeholder="Runtime (in minutes)">
+    <input type="text" id="cast" name="cast" placeholder="Cast (comma separated)">
+    <input type="text" id="director" name="director" placeholder="Director">
+    <input type="number" id="seasons" name="seasons" placeholder="Number of Seasons" class="hidden">
+    <button type="submit">Add Movie/Series</button>
+    <button type="button" id="updateButton" style="display:none;">Update Movie/Series</button>
+  </form>
+
+  <input type="text" id="searchBar" placeholder="Search for a movie or series...">
+
+  <h2>Movies and Series List</h2>
+  <div id="moviesList"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const mockMovies = [
+  {
+    "_id": "1",
+    "type": "movie",
+    "title": "The Shawshank Redemption",
+    "genre": "Drama",
+    "year": 1994,
+    "pgRating": "R",
+    "description": "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
+    "imageUrl": "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_QL75_UX100_CR0,1,100,148_.jpg",
+    "runtime": 142,
+    "cast": ["Tim Robbins", "Morgan Freeman"],
+    "director": "Frank Darabont"
+  },
+  {
+    "_id": "2",
+    "type": "movie",
+    "title": "The Godfather",
+    "genre": "Crime",
+    "year": 1972,
+    "pgRating": "R",
+    "description": "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.",
+    "imageUrl": "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_QL75_UY148_CR2,0,100,148_.jpg",
+    "runtime": 175,
+    "cast": ["Marlon Brando", "Al Pacino"],
+    "director": "Francis Ford Coppola"
+  },
+  {
+    "_id": "3",
+    "type": "series",
+    "title": "Breaking Bad",
+    "genre": "Crime",
+    "year": 2008,
+    "pgRating": "TV-MA",
+    "description": "A high school chemistry teacher turned methamphetamine manufacturer partners with a former student to create and sell the purest methamphetamine on the market.",
+    "imageUrl": "https://m.media-amazon.com/images/M/MV5BYmQ4YWMxYjUtNjZmYi00MDQ1LWFjMjMtNjA5ZDdiYjdiODU5XkEyXkFqcGdeQXVyMTMzNDExODE5._V1_QL75_UX100_CR0,1,100,148_.jpg",
+    "runtime": 49,
+    "cast": ["Bryan Cranston", "Aaron Paul"],
+    "director": "Vince Gilligan",
+    "seasons": 5
+  },
+  {
+    "_id": "4",
+    "type": "series",
+    "title": "Game of Thrones",
+    "genre": "Fantasy",
+    "year": 2011,
+    "pgRating": "TV-MA",
+    "description": "Nine noble families fight for control over the lands of Westeros, while an ancient enemy returns after being dormant for millennia.",
+    "imageUrl": "https://m.media-amazon.com/images/M/MV5BN2IzYzBiOTQtNGZmMi00NDI5LTgxMzMtN2EzZjA1NjhlOGMxXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_QL75_UX100_CR0,1,100,148_.jpg",
+    "runtime": 57,
+    "cast": ["Emilia Clarke", "Kit Harington"],
+    "director": "David Benioff",
+    "seasons": 8
+  },
+  {
+    "_id": "5",
+    "type": "movie",
+    "title": "Inception",
+    "genre": "Action",
+    "year": 2010,
+    "pgRating": "PG-13",
+    "description": "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
+    "imageUrl": "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_QL75_UX100_CR0,1,100,148_.jpg",
+    "runtime": 148,
+    "cast": ["Leonardo DiCaprio", "Joseph Gordon-Levitt"],
+    "director": "Christopher Nolan"
+  }
+];
+
+  
+      const form = document.getElementById('movieForm');
+      const typeSelect = document.getElementById('type');
+      const seasonsInput = document.getElementById('seasons');
+      const updateButton = document.getElementById('updateButton');
+      const searchBar = document.getElementById('searchBar');
+      const moviesList = document.getElementById('moviesList');
+      let isEditing = false;
+      let currentMovieId = null;
+      let allMovies = mockMovies;
+  
+      function displayMovies(movies) {
+  moviesList.innerHTML = '';
+  movies.forEach(movie => {
+    const movieDiv = document.createElement('div');
+    movieDiv.className = 'movie-item';
+    movieDiv.classList.add(movie.type); 
+    movieDiv.innerHTML = `
+      <strong>${movie.title}</strong> (${movie.year}) - ${movie.genre}
+      <button onclick="editMovie('${movie._id}')">Edit</button>
+      <button onclick="deleteMovie('${movie._id}')">Delete</button>
+      <img src="${movie.imageUrl}" alt="${movie.title}">
+    `;
+    moviesList.appendChild(movieDiv);
+  });
+}
+
+  
+      function filterMovies(query) {
+        const filteredMovies = allMovies.filter(movie => movie.title.toLowerCase().includes(query.toLowerCase()));
+        displayMovies(filteredMovies);
+      }
+  
+      searchBar.addEventListener('input', function() {
+        const query = searchBar.value.trim();
+        filterMovies(query);
+      });
+  
+      async function addOrUpdateMovie(movieData) {
+        if (isEditing) {
+          
+          const index = allMovies.findIndex(movie => movie._id === currentMovieId);
+          if (index !== -1) {
+            allMovies[index] = { _id: currentMovieId, ...movieData };
+            displayMovies(allMovies);
+          }
+        } else {
+
+          const newMovie = { _id: String(Date.now()), ...movieData };
+          allMovies.push(newMovie);
+          displayMovies(allMovies);
+        }
+      }
+  
+      form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const movieData = {
+          type: typeSelect.value,
+          title: form.title.value,
+          genre: form.genre.value,
+          year: Number(form.year.value),
+          pgRating: form.pgRating.value,
+          description: form.description.value,
+          imageUrl: form.imageUrl.value,
+          runtime: Number(form.runtime.value),
+          cast: form.cast.value.split(',').map(actor => actor.trim()),
+          director: form.director.value,
+          seasons: typeSelect.value === 'series' ? Number(form.seasons.value) : null,
+        };
+        addOrUpdateMovie(movieData);
+        form.reset();
+        isEditing = false;
+        currentMovieId = null;
+      });
+  
+      window.editMovie = function(id) {
+        const movie = allMovies.find(movie => movie._id === id);
+        if (movie) {
+          form.type.value = movie.type;
+          form.title.value = movie.title;
+          form.genre.value = movie.genre;
+          form.year.value = movie.year;
+          form.pgRating.value = movie.pgRating;
+          form.description.value = movie.description;
+          form.imageUrl.value = movie.imageUrl;
+          form.runtime.value = movie.runtime;
+          form.cast.value = movie.cast.join(', ');
+          form.director.value = movie.director;
+          if (movie.type === 'series') {
+            seasonsInput.value = movie.seasons;
+            seasonsInput.classList.remove('hidden');
+          } else {
+            seasonsInput.value = '';
+            seasonsInput.classList.add('hidden');
+          }
+          isEditing = true;
+          currentMovieId = id;
+          updateButton.style.display = 'block';
+        }
+      };
+  
+      window.deleteMovie = function(id) {
+        const index = allMovies.findIndex(movie => movie._id === id);
+        if (index !== -1) {
+          allMovies.splice(index, 1);
+          displayMovies(allMovies);
+        }
+      };
+  
+      displayMovies(allMovies);
+    });
+  </script>
+  
+</body>
+</html>
